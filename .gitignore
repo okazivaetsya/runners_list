@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 # PDF and CSV
-.pdf
-.csv
+*.pdf
+*.csv
