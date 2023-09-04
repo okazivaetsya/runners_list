@@ -1,36 +1,44 @@
 import csv
 from fpdf import FPDF
 
-pdf = FPDF()
-pdf.add_page()
-pdf.add_font('Ubuntu', '', 'UbuntuCondensed-Regular.ttf', uni=True)
-pdf.set_font('Ubuntu', size=10)
-
-PAGE_WIDTH = 210
-PAGE_HEIGHT = 297
-COLUMN_WIDTH = PAGE_WIDTH / 2
-ROW_HEIGHT = pdf.font_size * 1.5
-
-
-def column_switcher(value: bool) -> bool:
-    """Переключалка колонок"""
-    return True if value is False else False
-
-
-def get_year(date: str) -> int:
-    return date.split('-')[0]
-
-
-def add_row(row):
-    """Добавляем строку"""
-    pdf.cell(
-            COLUMN_WIDTH - 20,
-            ROW_HEIGHT,
-            txt=f"{row[0]}   {row[1]} {row[2]} ({get_year(row[3])})", ln=1
-        )
-
-
 def get_pdf(file):
+    class PDF(FPDF):
+        # Page footer
+        def footer(self):
+            # Position at 1.5 cm from bottom
+            self.set_y(-15)
+            # Page number
+            self.cell(0, 10, str(self.page_no()) + '/{nb}', 0, 0, 'C')
+
+
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.add_font('Ubuntu', '', 'UbuntuCondensed-Regular.ttf', uni=True)
+    pdf.set_font('Ubuntu', size=10)
+
+    PAGE_WIDTH = 210
+    PAGE_HEIGHT = 297
+    COLUMN_WIDTH = PAGE_WIDTH / 2
+    ROW_HEIGHT = pdf.font_size * 1.5
+
+
+    def column_switcher(value: bool) -> bool:
+        """Переключалка колонок"""
+        return True if value is False else False
+
+
+    def get_year(date: str) -> int:
+        return date.split('-')[0]
+
+
+    def add_row(row):
+        """Добавляем строку"""
+        pdf.cell(
+                COLUMN_WIDTH - 20,
+                ROW_HEIGHT,
+                txt=f"{row[0]}   {row[1]} {row[2]} ({get_year(row[3])})", ln=1
+            )
     # Читаем CSV файл с данными клиентов
     with open(file, encoding='utf-8-sig', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')

@@ -1,7 +1,7 @@
 import os
 import telebot
-import runners_list_by_alph
-import runners_list_by_number
+from runners_list_by_alph import get_pdf as get_alph_list
+from runners_list_by_number import get_pdf as get_numb_list
 
 bot = telebot.TeleBot('6653446865:AAEXYUSUM4RPVnxaFGREbhL_gHqB4uM-5Pc')
 
@@ -25,9 +25,9 @@ def handle_document(message):
             with open(file_name, 'wb') as new_file:
                 new_file.write(downloaded_file)
 
-            runners_list_by_alph.get_pdf(file_name)
+            get_alph_list(file_name)
 
-            runners_list_by_number.get_pdf(file_name)
+            get_numb_list(file_name)
 
             # Отправляем файл с алф.списками пользователю
             with open(f'{file_name.split(".")[0]}_by_alph.pdf', 'rb') as alph_list_file:
@@ -38,9 +38,9 @@ def handle_document(message):
                 bot.send_document(message.chat.id, numbers_list_file)
 
             # Удаляем временный файл
-            os.remove(file_name)
-            os.remove(f'{file_name.split(".")[0]}_by_alph.pdf')
-            os.remove(f'{file_name.split(".")[0]}_by_numbers.pdf')
+            # os.remove(file_name)
+            # os.remove(f'{file_name.split(".")[0]}_by_alph.pdf')
+            # os.remove(f'{file_name.split(".")[0]}_by_numbers.pdf')
 
         else:
             bot.reply_to(message, "Пожалуйста, отправьте файл в формате CSV.")

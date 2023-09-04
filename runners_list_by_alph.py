@@ -1,86 +1,91 @@
 import csv
 from fpdf import FPDF
 
-# Создаем PDF файл
-pdf = FPDF()
-pdf.add_page()
-pdf.add_font('Ubuntu', '', 'UbuntuCondensed-Regular.ttf', uni=True)
-pdf.set_font('Ubuntu', size=10)
-
-PAGE_WIDTH = 210
-PAGE_HEIGHT = 297
-COLUMN_WIDTH = PAGE_WIDTH / 2
-LAST_LETTER = '0'
-ROW_HEIGHT = pdf.font_size * 1.5
-
-# Определяем максимальное количество строк на странице
-MAX_ROWS = 100
-
-# Определяем текущие координаты курсора
-x = 10
-y = 10
-
-# Опреелем значение индекса колонок
-column_index = 0
-
-# Устанавливаем курсор на первую колонку
-first_column = True
-
-
-def check_new_letter(row) -> bool:
-    """Проверяем наличие новой буквы"""
-    global LAST_LETTER
-    if row[1][0] != LAST_LETTER:
-        LAST_LETTER = row[1][0]
-        return True
-    return False
-
-
-def get_year(date: str) -> int:
-    """Достаем год из даты рождения"""
-    return date.split('-')[0]
-
-
-def column_switcher(value: bool) -> bool:
-    """Переключалка колонок"""
-    return True if value is False else False
-
-
-def add_row(row):
-    """Добавляем строку"""
-    if check_new_letter(row):
-        global x
-        x -= 5
-        pdf.set_x(x)
-        pdf.cell(
-            5,
-            5,
-            # Выводим новую букву
-            txt=f"{LAST_LETTER}", ln=0
-        )
-        # global column_index
-        # column_index += 1
-        x += 5
-        pdf.set_x(x)
-
-    pdf.cell(
-            COLUMN_WIDTH - 20,
-            ROW_HEIGHT,
-            # формат строки Фамилия Имя (год рождения) – BIB
-            txt=f"{row[1]} {row[2]} ({get_year(row[3])}) – {row[0]}", ln=1
-        )
-
 
 # Читаем CSV файл с данными клиентов
 # (csv-файл BIB;фамилия;имя;дата рождения в формате гггг-мм-дд)
 def get_pdf(file):
+    class PDF(FPDF):
+        # Page footer
+        def footer(self):
+            # Position at 1.5 cm from bottom
+            self.set_y(-15)
+            # Page number
+            self.cell(0, 10, str(self.page_no()) + '/{nb}', 0, 0, 'C')
+
+    # Создаем PDF файл
+    pdf = PDF()
+    pdf.alias_nb_pages()
+    pdf.add_page()
+    pdf.add_font('Ubuntu', '', 'UbuntuCondensed-Regular.ttf', uni=True)
+    pdf.set_font('Ubuntu', size=10)
+
+    PAGE_WIDTH = 210
+    PAGE_HEIGHT = 297
+    COLUMN_WIDTH = PAGE_WIDTH / 2
+    ROW_HEIGHT = pdf.font_size * 1.5
+    LAST_LETTER = '0'
+
+    # Определяем максимальное количество строк на странице
+    MAX_ROWS = 100
+
+    # Определяем текущие координаты курсора
+    x = 10
+    y = 10
+
+    # Опреелем значение индекса колонок
+    column_index = 0
+
+    # Устанавливаем курсор на первую колонку
+    first_column = True
+
+
+    def check_new_letter(row) -> bool:
+        """Проверяем наличие новой буквы"""
+        nonlocal LAST_LETTER
+        if row[1][0] != LAST_LETTER:
+            LAST_LETTER = row[1][0]
+            return True
+        return False
+
+
+    def get_year(date: str) -> int:
+        """Достаем год из даты рождения"""
+        return date.split('-')[0]
+
+
+    def column_switcher(value: bool) -> bool:
+        """Переключалка колонок"""
+        return True if value is False else False
+
+
+    def add_row(row):
+        """Добавляем строку"""
+        nonlocal x, LAST_LETTER
+        if check_new_letter(row):
+            x -= 5
+            pdf.set_x(x)
+            pdf.cell(
+                5,
+                5,
+                # Выводим новую букву
+                txt=f"{LAST_LETTER}", ln=0
+            )
+            x += 5
+            pdf.set_x(x)
+
+        pdf.cell(
+                COLUMN_WIDTH - 20,
+                ROW_HEIGHT,
+                # формат строки Фамилия Имя (год рождения) – BIB
+                txt=f"{row[1]} {row[2]} ({get_year(row[3])}) – {row[0]}", ln=1
+            )
     with open(file, encoding='utf-8-sig', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
         # Сортируем данные по фамилии
         sorted_data = sorted(reader, key=lambda row: row[1])
     # Добавляем данные в PDF файл
     for i, row in enumerate(sorted_data):
-        global first_column, column_index, x, y
         column_index += 1
         if column_index > 50:
             column_index = 1
