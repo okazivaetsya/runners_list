@@ -1,5 +1,7 @@
 import csv
+
 from fpdf import FPDF
+
 
 def get_pdf(file):
     class PDF(FPDF):
@@ -29,7 +31,8 @@ def get_pdf(file):
 
 
     def get_year(date: str) -> int:
-        return date.split('-')[0]
+        new_date = date.split('-')
+        return f'{new_date[-1]}.{new_date[-2]}.{new_date[-3]}'
 
 
     def add_row(row):

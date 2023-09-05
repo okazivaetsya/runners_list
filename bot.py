@@ -1,9 +1,20 @@
+import logging
 import os
+
 import telebot
+from dotenv.main import load_dotenv
+
 from runners_list_by_alph import get_pdf as get_alph_list
 from runners_list_by_number import get_pdf as get_numb_list
 
-bot = telebot.TeleBot('6653446865:AAEXYUSUM4RPVnxaFGREbhL_gHqB4uM-5Pc')
+load_dotenv()
+TOKEN = os.environ['BOT_TOKEN']
+
+# Инициализация логгирования
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+bot = telebot.TeleBot(TOKEN)
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -38,9 +49,9 @@ def handle_document(message):
                 bot.send_document(message.chat.id, numbers_list_file)
 
             # Удаляем временный файл
-            # os.remove(file_name)
-            # os.remove(f'{file_name.split(".")[0]}_by_alph.pdf')
-            # os.remove(f'{file_name.split(".")[0]}_by_numbers.pdf')
+            os.remove(file_name)
+            os.remove(f'{file_name.split(".")[0]}_by_alph.pdf')
+            os.remove(f'{file_name.split(".")[0]}_by_numbers.pdf')
 
         else:
             bot.reply_to(message, "Пожалуйста, отправьте файл в формате CSV.")

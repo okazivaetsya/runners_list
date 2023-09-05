@@ -1,9 +1,8 @@
 import csv
+
 from fpdf import FPDF
 
 
-# Читаем CSV файл с данными клиентов
-# (csv-файл BIB;фамилия;имя;дата рождения в формате гггг-мм-дд)
 def get_pdf(file):
     class PDF(FPDF):
         # Page footer
